@@ -39,6 +39,7 @@ namespace Basic2D {
 									   //3: (!)save var
 									   //4: (==)equals
 									   //5: (~)clear var
+									   //6: (?)read var
 		static public string value = "";
 		static public string varName = "";
 
@@ -85,6 +86,9 @@ namespace Basic2D {
 								if (operand == 5) {
 									IntVars.Remove(varName);
 								}
+								if (operand == 6) {
+									IntVars[varName] = Int32.Parse(Console.ReadLine());
+								}
 							}
 							operationType = 0;
 							operand = 0;
@@ -111,6 +115,11 @@ namespace Basic2D {
 								}
 								else if (currentChar == '~') {
 									operand = 5;
+									gettingVarName = false;
+									gettingOtherValue = true;
+								}
+								else if (currentChar == '?') {
+									operand = 6;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
