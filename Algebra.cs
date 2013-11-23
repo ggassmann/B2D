@@ -23,7 +23,7 @@ namespace Basic2D {
 						var newOp = operation.Substring(parenStart + 1, i - parenStart - 1);
 						var ans = Algebra.Do(newOp);
 						operation = operation.Substring(0, parenStart) + ans + operation.Substring(i + 1);
-						Console.WriteLine(operation);
+						i = 0;
 					}
 				}
 			}
