@@ -7,11 +7,23 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Basic2D {
+	class Position {
+		public int X;
+		public int Y;
+		public Position(int x, int y) {
+			X = x;
+			Y = y;
+		}
+		public override string ToString() {
+			return "[" + X + ", " + Y + "]";
+		}
+	}
 	class Program {
 		static public Dictionary<string, int> IntVars = new Dictionary<string, int>();
 
 		static public int x = 0;
 		static public int y = 0;
+		static List<Position> path = new List<Position>();
 		static public int direction = 0; //NSEW
 
 		static public bool forcePrintNextChar = false; //n*\ outputs \n for newline
@@ -21,11 +33,12 @@ namespace Basic2D {
 		static public bool gettingOtherValue = false;
 		static public int operationType = 0; //0: Int operation 
 											 //1: String operation
-		static public int operand = 0; //0: (+)addition 
+		static public int operand = 0;
 									   //1: (@)print var
 									   //2: (=)set var
-									   //3: (-)subtraction
+									   //3: (!)save var
 									   //4: (==)equals
+									   //5: (~)clear var
 		static public string value = "";
 		static public string varName = "";
 
@@ -33,9 +46,9 @@ namespace Basic2D {
 
 		static public char[,] program;
 		static void Main(string[] args) {
-			LoadProgram();
-			IntVars.Add("c", 0);
-			while (true) {
+			LoadProgram(args[0]);
+			bool quit = false;
+			while (!quit) {
 				var currentChar = program[x, y];
 				Char nextChar = default(char);
 				try {
@@ -51,23 +64,26 @@ namespace Basic2D {
 					if (inVarOperation) {
 						if (gettingOtherValue && currentChar == ']') {
 							if (operationType == 0) {
-								if (operand == 0) {
-									IntVars[varName] += Int32.Parse(value);
-								}
 								if (operand == 1) {
 									Console.Write(IntVars[varName]);
 								}
 								if (operand == 2) {
-									IntVars[varName] = Int32.Parse(value);
+									if (!IntVars.ContainsKey(varName)) {
+										IntVars.Add(varName, 0);
+									}
+									IntVars[varName] = Algebra.Do(value);
 								}
 								if (operand == 3) {
-									IntVars[varName] -= Int32.Parse(value);
+									File.WriteAllText(value, IntVars[varName].ToString());
 								}
 								if (operand == 4) {
 									equalEquals = false;
 									if (IntVars[varName] == Int32.Parse(value)) {
 										MovePointer();
 									}
+								}
+								if (operand == 5) {
+									IntVars.Remove(varName);
 								}
 							}
 							operationType = 0;
@@ -83,13 +99,18 @@ namespace Basic2D {
 								value += currentChar;
 							}
 							if (gettingVarName) {
-								if (currentChar == '+') {
-									operand = 0;
+								if (currentChar == '@') {
+									operand = 1;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
-								else if (currentChar == '@') {
-									operand = 1;
+								else if (currentChar == '!') {
+									operand = 3;
+									gettingVarName = false;
+									gettingOtherValue = true;
+								}
+								else if (currentChar == '~') {
+									operand = 5;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
@@ -103,11 +124,6 @@ namespace Basic2D {
 										gettingVarName = false;
 										gettingOtherValue = true;
 									}
-								}
-								else if (currentChar == '-') {
-									operand = 3;
-									gettingVarName = false;
-									gettingOtherValue = true;
 								}
 								else {
 									varName += currentChar;
@@ -124,14 +140,21 @@ namespace Basic2D {
 							 NoOperation(currentChar) ||
 							 ForcePrint(currentChar) ||
 							 NewLine(currentChar) ||
-							 Mirror(currentChar)){
+							 Mirror(currentChar) ||
+							 ChangeDirectionRandom(currentChar)
+							 ){
 						print = false;
 						if (ForcePrint(currentChar)) {
 							forcePrintNextChar = true;
 						}
 					}
 					if (print) {
-						Console.Write(currentChar);
+						if(currentChar == ';') {
+							quit = true;
+						}
+						else {
+							Console.Write(currentChar);
+						}
 					}
 				}
 				else {
@@ -141,6 +164,8 @@ namespace Basic2D {
 				MovePointer();
 				//Thread.Sleep(4);
 			}
+			Console.WriteLine("\nDone...");
+			Console.ReadKey();
 		}
 
 		private static bool NewLine(char current) {
@@ -152,11 +177,9 @@ namespace Basic2D {
 		private static bool ForcePrint(char current) {
 			return current == '*';
 		}
-
 		private static bool NoOperation(char current) {
 			return current == ',';
 		}
-
 		private static bool ChangeDirection(char current) {
 			if (current == '>') {
 				direction = 2;
@@ -176,7 +199,14 @@ namespace Basic2D {
 			}
 			return false;
 		}
-
+		static Random _r = new Random();
+		private static bool ChangeDirectionRandom(char current) {
+			if (current == '#') {
+				direction = _r.Next(0, 4);
+				return true;
+			}
+			return false;
+		}
 		private static void MovePointer() {
 			if (direction == 0) {
 				y--;
@@ -190,6 +220,7 @@ namespace Basic2D {
 			if (direction == 3) {
 				x--;
 			}
+			path.Add(new Position(x, y));
 		}
 		static bool Mirror(Char current) {
 			if (current == '\\') {
@@ -224,8 +255,8 @@ namespace Basic2D {
 			}
 			return false;
 		}
-		private static void LoadProgram() {
-			var file = File.ReadAllLines("testcode.b2d");
+		private static void LoadProgram(string filePath) {
+			var file = File.ReadAllLines(filePath);
 			int maxX = 0;
 			int maxY = file.Length;
 			for (int i = 0; i < maxY; i++) {
