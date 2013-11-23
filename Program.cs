@@ -25,22 +25,31 @@ namespace Basic2D {
 									   //1: (@)print var
 									   //2: (=)set var
 									   //3: (-)subtraction
+									   //4: (==)equals
 		static public string value = "";
 		static public string varName = "";
+
+		static public bool equalEquals = false;
 
 		static public char[,] program;
 		static void Main(string[] args) {
 			LoadProgram();
 			IntVars.Add("c", 0);
 			while (true) {
-				var current = program[x, y];
+				var currentChar = program[x, y];
+				Char nextChar = default(char);
+				try {
+					nextChar = program[x + (direction == 2 ? 1 : 0) + (direction == 3 ? -1 : 0),
+									   y + (direction == 0 ? -1 : 0) + (direction == 1 ? 1 : 0)];
+				}
+				catch { };
 				bool print = true;
 				if (!forcePrintNextChar) {
-					if (!inVarOperation && current == '[') {
+					if (!inVarOperation && currentChar == '[') {
 						inVarOperation = true;
 					}
 					if (inVarOperation) {
-						if (gettingOtherValue && current == ']') {
+						if (gettingOtherValue && currentChar == ']') {
 							if (operationType == 0) {
 								if (operand == 0) {
 									IntVars[varName] += Int32.Parse(value);
@@ -54,6 +63,12 @@ namespace Basic2D {
 								if (operand == 3) {
 									IntVars[varName] -= Int32.Parse(value);
 								}
+								if (operand == 4) {
+									equalEquals = false;
+									if (IntVars[varName] == Int32.Parse(value)) {
+										MovePointer();
+									}
+								}
 							}
 							operationType = 0;
 							operand = 0;
@@ -65,59 +80,66 @@ namespace Basic2D {
 						}
 						else {
 							if (gettingOtherValue) {
-								value += current;
+								value += currentChar;
 							}
 							if (gettingVarName) {
-								if (current == '+') {
+								if (currentChar == '+') {
 									operand = 0;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
-								else if (current == '@') {
+								else if (currentChar == '@') {
 									operand = 1;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
-								else if (current == '=') {
-									operand = 2;
-									gettingVarName = false;
-									gettingOtherValue = true;
+								else if (currentChar == '=') {
+									operand = equalEquals == true ? 4 : 2;
+									if (nextChar == '=') {
+										operand = 4;
+										equalEquals = true;
+									}
+									else {
+										gettingVarName = false;
+										gettingOtherValue = true;
+									}
 								}
-								else if (current == '-') {
+								else if (currentChar == '-') {
 									operand = 3;
 									gettingVarName = false;
 									gettingOtherValue = true;
 								}
 								else {
-									varName += current;
+									varName += currentChar;
 								}
 							}
-							if (current == '$') {
+							if (currentChar == '$') {
 								operationType = 0;
 								gettingVarName = true;
 							}
 						}
 						print = false;
 					}
-					else if (ChangeDirection(current) || 
-							 NoOperation(current) ||
-							 ForcePrint(current) ||
-							 NewLine(current)){
+					else if (ChangeDirection(currentChar) || 
+							 NoOperation(currentChar) ||
+							 ForcePrint(currentChar) ||
+							 NewLine(currentChar) ||
+							 Mirror(currentChar)){
 						print = false;
-						if (ForcePrint(current)) {
+						if (ForcePrint(currentChar)) {
 							forcePrintNextChar = true;
 						}
 					}
 					if (print) {
-						Console.Write(current);
+						Console.Write(currentChar);
 					}
 				}
 				else {
-					Console.Write(current);
+					Console.Write(currentChar);
 					forcePrintNextChar = false;
 				}
 				MovePointer();
-				Thread.Sleep(4);
+				//Thread.Sleep(4);
 			}
 		}
 
@@ -169,19 +191,38 @@ namespace Basic2D {
 				x--;
 			}
 		}
-		static void mirrorBackslash() {
-			if (direction == 2) { //East
-				direction = 1; //South
+		static bool Mirror(Char current) {
+			if (current == '\\') {
+				if (direction == 2) { //East
+					direction = 1; //South
+				}
+				else if (direction == 1) { //South
+					direction = 2; //East
+				}
+				if (direction == 3) { //West
+					direction = 0; //North
+				}
+				else if (direction == 0) { //North
+					direction = 3; //West
+				}
+				return true;
 			}
-			else if (direction == 1) { //South
-				direction = 2; //East
+			if (current == '/') {
+				if (direction == 2) { //East
+					direction = 0; //North
+				}
+				else if (direction == 0) { //North
+					direction = 2; //East
+				}
+				if (direction == 3) { //West
+					direction = 1; //South
+				}
+				else if (direction == 1) { //South
+					direction = 3; //West
+				}
+				return true;
 			}
-			if (direction == 3) { //West
-				direction = 0; //North
-			}
-			else if (direction == 0) { //North
-				direction = 3; //West
-			}
+			return false;
 		}
 		private static void LoadProgram() {
 			var file = File.ReadAllLines("testcode.b2d");
