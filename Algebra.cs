@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Basic2D {
 	public static class Algebra {
-		public static int Do(string operation) {
+		public static string Do(string operation) {
 			Calc c = new Calc();
 			int parenDepth = 0;
 			int parenStart = 0;
@@ -29,67 +29,78 @@ namespace Basic2D {
 			}
 			for (int i = 0; i < operation.Length; i++) {
 				if (operation[i] == '/') {
-					int leftInt;
-					int rightInt;
-					GetNums(operation, i, out leftInt, out rightInt);
-					operation = PatchOperation(operation, i, leftInt / rightInt);
+					object leftVal;
+					object rightVal;
+					GetVals(operation, i, out leftVal, out rightVal);
+					operation = PatchOperation(operation, i, ((int)leftVal / (int)rightVal).ToString());
 					i = 0;
 				}
 				if (operation[i] == '*') {
-					int leftInt;
-					int rightInt;
-					GetNums(operation, i, out leftInt, out rightInt);
-					operation = PatchOperation(operation, i, leftInt * rightInt);
+					object leftVal;
+					object rightVal;
+					GetVals(operation, i, out leftVal, out rightVal);
+					operation = PatchOperation(operation, i, ((int)leftVal * (int)rightVal).ToString());
 					i = 0;
 				}
 			}
 			for (int i = 0; i < operation.Length; i++) {
 				if (operation[i] == '+') {
-					int leftInt;
-					int rightInt;
-					GetNums(operation, i, out leftInt, out rightInt);
-					operation = PatchOperation(operation, i, leftInt + rightInt);
+					object leftVal;
+					object rightVal;
+					GetVals(operation, i, out leftVal, out rightVal);
+					if (leftVal.GetType() == typeof(int)) {
+						operation = PatchOperation(operation, i, ((int)leftVal + (int)rightVal).ToString());
+					}
+					else {
+						leftVal = DeString((string)leftVal);
+						rightVal = DeString((string)rightVal);
+						operation = PatchOperation(operation, i, (string)leftVal + (string)rightVal);
+					}
 					i = 0;
 				}
 				if (operation[i] == '-') {
-					int leftInt;
-					int rightInt;
-					GetNums(operation, i, out leftInt, out rightInt);
-					operation = PatchOperation(operation, i, leftInt - rightInt);
+					object leftVal;
+					object rightVal;
+					GetVals(operation, i, out leftVal, out rightVal);
+					operation = PatchOperation(operation, i, ((int)leftVal - (int)rightVal).ToString());
 					i = 0;
 				}
 			}
 			try {
-				return Int32.Parse(operation);
+				return operation;
 			}
 			catch {
-				return Program.IntVars[operation];
+				return Program.Vars[operation].ToString();
 			}
 		}
 
-		private static string PatchOperation(string operation, int i, int num) {
+		private static string DeString(string str) {
+			return str.Substring(1, str.Length - 2);
+		}
+
+		private static string PatchOperation(string operation, int i, string dat) {
 			if (countOperators(operation) >= 2) {
-				operation = operation.Substring(0, getLeftBound(operation, i) == 0 ? getLeftBound(operation, i) : getLeftBound(operation, i) + 1) + num + operation.Substring(getRightBound(operation, i));
+				operation = operation.Substring(0, getLeftBound(operation, i) == 0 ? getLeftBound(operation, i) : getLeftBound(operation, i) + 1) + dat + operation.Substring(getRightBound(operation, i));
 			}
 			else {
-				operation = num.ToString();
+				operation = dat.ToString();
 			}
 			return operation;
 		}
-		private static void GetNums(string operation, int i, out int leftInt, out int rightInt) {
+		private static void GetVals(string operation, int i, out object leftVal, out object rightVal) {
 			var leftString = operation.Substring(getLeftBound(operation, i), i - getLeftBound(operation, i));
 			var rightString = operation.Substring(i + 1, getRightBound(operation, i) - i - 1);
 			try {
-				leftInt = Int32.Parse(leftString);
+				leftVal = Int32.Parse(leftString);
 			}
 			catch {
-				leftInt = Program.IntVars[leftString];
+				leftVal = Program.Vars[leftString];
 			}
 			try {
-				rightInt = Int32.Parse(rightString);
+				rightVal = Int32.Parse(rightString);
 			}
 			catch {
-				rightInt = Program.IntVars[rightString];
+				rightVal = Program.Vars[rightString];
 			}
 		}
 		private static int getLeftBound(string s, int root) {

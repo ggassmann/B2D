@@ -18,8 +18,8 @@ namespace Basic2D {
 			return "[" + X + ", " + Y + "]";
 		}
 	}
-	class Program {
-		static public Dictionary<string, int> IntVars = new Dictionary<string, int>();
+	public class Program {
+		static public Dictionary<string, object> Vars = new Dictionary<string, object>();
 
 		static public int x = 0;
 		static public int y = 0;
@@ -31,8 +31,8 @@ namespace Basic2D {
 		static public bool inVarOperation = false;
 		static public bool gettingVarName = false;
 		static public bool gettingOtherValue = false;
-		static public int operationType = 0; //0: Int operation 
-											 //1: String operation
+		static public int operationType = 0; //0: ($) Int operation 
+											 //1: (") String operation
 		static public int operand = 0;
 									   //1: (@)print var
 									   //2: (=)set var
@@ -46,7 +46,7 @@ namespace Basic2D {
 		static public bool equalEquals = false;
 
 		static public char[,] program;
-		static void Main(string[] args) {
+		static public void Main(string[] args) {
 			LoadProgram(args[0]);
 			bool quit = false;
 			while (!quit) {
@@ -66,28 +66,50 @@ namespace Basic2D {
 						if (gettingOtherValue && currentChar == ']') {
 							if (operationType == 0) {
 								if (operand == 1) {
-									Console.Write(IntVars[varName]);
+									Console.Write(Vars[varName]);
 								}
 								if (operand == 2) {
-									if (!IntVars.ContainsKey(varName)) {
-										IntVars.Add(varName, 0);
+									if (!Vars.ContainsKey(varName)) {
+										Vars.Add(varName, 0);
 									}
-									IntVars[varName] = Algebra.Do(value);
+									try {
+										Vars[varName] = Int32.Parse(Algebra.Do(value));
+									}
+									catch {
+										Vars[varName] = Int32.Parse((Vars[Algebra.Do(value)].ToString()));
+									}
 								}
 								if (operand == 3) {
-									File.WriteAllText(value, IntVars[varName].ToString());
+									File.WriteAllText(value, Vars[varName].ToString());
 								}
 								if (operand == 4) {
 									equalEquals = false;
-									if (IntVars[varName] == Int32.Parse(value)) {
+									if ((int)Vars[varName] == Int32.Parse(value)) {
 										MovePointer();
 									}
 								}
 								if (operand == 5) {
-									IntVars.Remove(varName);
+									Vars.Remove(varName);
 								}
 								if (operand == 6) {
-									IntVars[varName] = Int32.Parse(Console.ReadLine());
+									Vars[varName] = Int32.Parse(Console.ReadLine());
+								}
+							}
+							else if (operationType == 1) {
+								if (operand == 1) {
+									Console.Write(Vars[varName]);
+								}
+								else if (operand == 2) {
+									if (!Vars.ContainsKey(varName)) {
+										Vars.Add(varName, "");
+									}
+									Vars[varName] = Algebra.Do(value);
+								}
+								else if (operand == 6) {
+									Vars[varName] = Console.ReadLine();
+								}
+								else {
+									throw new Exception("Unknown operand");
 								}
 							}
 							operationType = 0;
@@ -140,6 +162,10 @@ namespace Basic2D {
 							}
 							if (currentChar == '$') {
 								operationType = 0;
+								gettingVarName = true;
+							}
+							if (currentChar == '\"') {
+								operationType = 1;
 								gettingVarName = true;
 							}
 						}
