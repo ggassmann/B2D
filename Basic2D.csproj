@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Basic2D</RootNamespace>
     <AssemblyName>Basic2D</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,8 +45,10 @@
     <Compile Include="Algebra.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="examples\obfuscation.b2d" />
     <None Include="examples\cat.b2d" />
     <None Include="examples\fibonnaci.b2d" />
+    <None Include="examples\highlowgame.b2d" />
     <None Include="examples\randomnumber.b2d" />
     <None Include="examples\savefile.b2d" />
     <None Include="testcode.b2d">

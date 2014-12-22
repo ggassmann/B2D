@@ -24,7 +24,7 @@ namespace Basic2D {
 		static public int x = 0;
 		static public int y = 0;
 		static List<Position> path = new List<Position>();
-		static public int direction = 0; //NSEW
+		static public int direction = 0; //NSEW / 0123
 
 		static public bool forcePrintNextChar = false; //n*\ outputs \n for newline
 
@@ -40,6 +40,8 @@ namespace Basic2D {
 									   //4: (==)equals
 									   //5: (~)clear var
 									   //6: (?)read var
+                                       //7: (+)greater than
+                                       //8: (-)less than
 		static public string value = "";
 		static public string varName = "";
 
@@ -47,9 +49,26 @@ namespace Basic2D {
 
 		static public char[,] program;
 		static public void Main(string[] args) {
+            if (args.Count() == 0) {
+                Console.WriteLine("Usage: \"mono Basic2D.exe [file]\"");
+                Console.ReadKey();
+                return;
+            }
 			LoadProgram(args[0]);
 			bool quit = false;
 			while (!quit) {
+                if (program.GetLength(0) <= x) {
+                    throw new Exception("Out of program, (" + x + "," + y + ")");
+                }
+                if (x < 0) {
+                    throw new Exception("Out of program, (" + x + "," + y + ")");
+                }
+                if (program.GetLength(1) <= y) {
+                    throw new Exception("Out of program, (" + x + "," + y + ")");
+                }
+                if (y < 0) {
+                    throw new Exception("Out of program, (" + x + "," + y + ")");
+                }
 				var currentChar = program[x, y];
 				Char nextChar = default(char);
 				try {
@@ -84,7 +103,14 @@ namespace Basic2D {
 								}
 								if (operand == 4) {
 									equalEquals = false;
-									if ((int)Vars[varName] == Int32.Parse(value)) {
+                                    var val = 0;
+                                    try {
+                                        val = Int32.Parse(value);
+                                    }
+                                    catch {
+                                        val = (int)Vars[Algebra.Do(value)];
+                                    }
+									if ((int)Vars[varName] == val) {
 										MovePointer();
 									}
 								}
@@ -94,6 +120,30 @@ namespace Basic2D {
 								if (operand == 6) {
 									Vars[varName] = Int32.Parse(Console.ReadLine());
 								}
+                                if (operand == 7) {
+                                    var val = 0;
+                                    try {
+                                        val = Int32.Parse(value);
+                                    }
+                                    catch {
+                                        val = (int)Vars[Algebra.Do(value)];
+                                    }
+                                    if ((int)Vars[varName] > val) {
+                                        MovePointer();
+                                    }
+                                }
+                                if (operand == 8) {
+                                    var val = 0;
+                                    try {
+                                        val = Int32.Parse(value);
+                                    }
+                                    catch {
+                                        val = (int)Vars[Algebra.Do(value)];
+                                    }
+                                    if ((int)Vars[varName] < val) {
+                                        MovePointer();
+                                    }
+                                }
 							}
 							else if (operationType == 1) {
 								if (operand == 1) {
@@ -155,10 +205,20 @@ namespace Basic2D {
 										gettingVarName = false;
 										gettingOtherValue = true;
 									}
-								}
-								else {
-									varName += currentChar;
-								}
+                                }
+                                else if (currentChar == '+') {
+                                    operand = 7;
+                                    gettingVarName = false;
+                                    gettingOtherValue = true;
+                                }
+                                else if (currentChar == '-') {
+                                    operand = 8;
+                                    gettingVarName = false;
+                                    gettingOtherValue = true;
+                                }
+                                else {
+                                    varName += currentChar;
+                                }
 							}
 							if (currentChar == '$') {
 								operationType = 0;
