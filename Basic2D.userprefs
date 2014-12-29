@@ -1,8 +1,8 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Program.cs">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="..\..\UnityKinectSandbox\Assets\Scripts\ConnectionScript.cs">
     <Files>
-      <File FileName="Program.cs" Line="370" Column="3" />
+      <File FileName="..\..\UnityKinectSandbox\Assets\Scripts\ConnectionScript.cs" Line="24" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

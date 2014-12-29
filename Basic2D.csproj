@@ -60,6 +60,7 @@
     <None Include="testcode.b2d">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="examples\superstory3million.b2d" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

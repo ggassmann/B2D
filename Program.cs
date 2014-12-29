@@ -26,7 +26,8 @@ namespace Basic2D {
 		static List<Position> path = new List<Position>();
 		static public int direction = 0; //NSEW / 0123
 
-		static public bool forcePrintNextChar = false; //n*\ outputs \n for newline
+		static public bool forcePrintNextChar = false;
+		static public bool waitForKeypress = false;
 
 		static public bool inVarOperation = false;
 		static public bool gettingVarName = false;
@@ -236,9 +237,13 @@ namespace Basic2D {
 							 ForcePrint(currentChar) ||
 							 NewLine(currentChar) ||
 							 Mirror(currentChar) ||
-							 ChangeDirectionRandom(currentChar)
+							 ChangeDirectionRandom(currentChar) ||
+					         PressAnyKeyToClose(currentChar)
 							 ){
 						print = false;
+						if(PressAnyKeyToClose(currentChar)) {
+							Console.ReadKey();
+						}
 						if (ForcePrint(currentChar)) {
 							forcePrintNextChar = true;
 						}
@@ -274,6 +279,9 @@ namespace Basic2D {
 		}
 		private static bool NoOperation(char current) {
 			return current == ',';
+		}
+		private static bool PressAnyKeyToClose(char current) {
+			return current == '~';
 		}
 		private static bool ChangeDirection(char current) {
 			if (current == '>') {
