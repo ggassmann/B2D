@@ -61,6 +61,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="examples\superstory3million.b2d" />
+    <None Include="examples\99bottles.b2d" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
