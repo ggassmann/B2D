@@ -1,8 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace />
-  <MonoDevelop.Ide.Workbench ActiveDocument="..\..\UnityKinectSandbox\Assets\Scripts\ConnectionScript.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="examples\99bottles.b2d">
     <Files>
-      <File FileName="..\..\UnityKinectSandbox\Assets\Scripts\ConnectionScript.cs" Line="24" Column="2" />
+      <File FileName="examples\superstory3million.b2d" Line="4" Column="67" />
+      <File FileName="testcode.b2d" Line="8" Column="22" />
+      <File FileName="Program.cs" Line="59" Column="41" />
+      <File FileName="examples\99bottles.b2d" Line="5" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

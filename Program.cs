@@ -37,12 +37,13 @@ namespace Basic2D {
 		static public int operand = 0;
 									   //1: (@)print var
 									   //2: (=)set var
-									   //3: (!)save var
+									   //3: (!)save var to file
 									   //4: (==)equals
 									   //5: (~)clear var
 									   //6: (?)read var
                                        //7: (+)greater than
                                        //8: (-)less than
+									   //9: (#)read var from file
 		static public string value = "";
 		static public string varName = "";
 
@@ -56,19 +57,20 @@ namespace Basic2D {
                 return;
             }
 			LoadProgram(args[0]);
+			Vars.Add("__SCRIPT_NAME__", args[0]);
 			bool quit = false;
 			while (!quit) {
                 if (program.GetLength(0) <= x) {
-                    throw new Exception("Out of program, (" + x + "," + y + ")");
+                    throw new Exception("Out of program, (" + x + "," + y + ")" + (inVarOperation ? "Not" : "") + "In Operation");
                 }
                 if (x < 0) {
-                    throw new Exception("Out of program, (" + x + "," + y + ")");
+					throw new Exception("Out of program, (" + x + "," + y + ")" + (inVarOperation ? "Not" : "") + "In Operation");
                 }
                 if (program.GetLength(1) <= y) {
-                    throw new Exception("Out of program, (" + x + "," + y + ")");
+					throw new Exception("Out of program, (" + x + "," + y + ")" + (inVarOperation ? "Not" : "") + "In Operation");
                 }
                 if (y < 0) {
-                    throw new Exception("Out of program, (" + x + "," + y + ")");
+					throw new Exception("Out of program, (" + x + "," + y + ")" + (inVarOperation ? "Not" : "") + "In Operation");
                 }
 				var currentChar = program[x, y];
 				Char nextChar = default(char);
@@ -145,6 +147,10 @@ namespace Basic2D {
                                         MovePointer();
                                     }
                                 }
+								if (operand == 9) {
+									Vars[varName] = File.ReadAllText(value);
+									File.WriteAllText(value, Vars[varName].ToString());
+								}
 							}
 							else if (operationType == 1) {
 								if (operand == 1) {
@@ -156,11 +162,22 @@ namespace Basic2D {
 									}
 									Vars[varName] = Algebra.Do(value);
 								}
+								else if (operand == 3) {
+									File.WriteAllText(value, Vars[varName].ToString());
+								}
+								else if (operand == 5) {
+									if(Vars.ContainsKey(varName)) {
+										Vars.Remove(varName);
+									}
+								}
 								else if (operand == 6) {
 									Vars[varName] = Console.ReadLine();
 								}
+								else if (operand == 9) {
+									Vars[varName] = File.ReadAllText(value);
+								}
 								else {
-									throw new Exception("Unknown operand");
+									throw new Exception("Unknown operand (" + operand + ")");
 								}
 							}
 							operationType = 0;
@@ -217,6 +234,11 @@ namespace Basic2D {
                                     gettingVarName = false;
                                     gettingOtherValue = true;
                                 }
+								else if (currentChar == '#') {
+									operand = 9;
+									gettingVarName = false;
+									gettingOtherValue = true;
+								}
                                 else {
                                     varName += currentChar;
                                 }
